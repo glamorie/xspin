@@ -1,0 +1,29 @@
+[project]
+name = "xspin"
+version = "0.1.0"
+description = "Python module for creating stunning command line spinners."
+authors = [{ name = "James Njung'e", email = "james.glitchie@gmail.com" }]
+maintainers = [{ name = "James Njung'e", email = "james.glitchie@gmail.com" }]
+license = { file = "LICENSE" }
+readme = "README.md"
+
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Environment :: Console',
+    'Topic :: Software Development :: Libraries',
+    'Topic :: Utilities',
+    'Topic :: System :: Systems Administration',
+    'Natural Language :: English',
+    'Operating System :: OS Independent',
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
