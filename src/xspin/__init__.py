@@ -225,7 +225,7 @@ class SyncRuntime:
                 clear_lines(sum(clearable))
 
     def start(self):
-        if self.running:
+        if self.running or not state.enabled:
             return
         if state.instance:
             stop()
@@ -291,10 +291,11 @@ class AsyncRuntime:
                 clear_lines(sum(clearable))
 
     async def start(self):
-        if self.running:
+        if self.running or not state.enabled:
             return
         if state.instance:
             stop()
+
         schedule.before()
         state.instance = self
         self.running = True
@@ -334,6 +335,10 @@ def stop():
         state.handle.stop()
     elif isinstance(state.handle, AsyncRuntime):
         arun(state.handle.stop())
+
+
+def force():
+    state.enabled = True
 
 
 class Frames:
