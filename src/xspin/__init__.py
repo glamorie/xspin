@@ -1,4 +1,7 @@
+from math import ceil
 import sys
+from typing import Iterable
+from unicodedata import category, combining, east_asian_width
 
 if sys.platform == "win32":
     from ctypes import byref, c_ulong, windll, Structure
@@ -112,3 +115,36 @@ def show_cursor():
 class state:
     stream = sys.stdout.isatty() and sys.stdout or sys.stderr
     enabled = stream.isatty()
+
+
+pattern = None
+
+
+def get_pattern():
+    global pattern
+    if pattern:
+        return pattern
+    from re import compile
+
+    pattern = compile("\x1b" r"[^m]*?m")
+    return pattern
+
+
+def chwidth(char: str) -> int:
+    if category(char) in ["Cc", "Cf"]:
+        return -1
+    if combining(char):
+        return 0
+    width = east_asian_width(char)
+    if width in ["W", "F"]:
+        return 2
+    return 1
+
+
+def get_lines(text: str) -> Iterable[int]:
+    console_width = get_console_width()
+    text = get_pattern().sub("", text)
+    length = text.isascii() and len or chwidth
+
+    for line in text.splitlines():
+        yield ceil(length(line) / console_width)
