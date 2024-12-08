@@ -376,8 +376,8 @@ class Spinner:
         symbols: Optional[Iterable[str]] = None,
     ) -> None:
         self.frames = Frames(
-            label or "Loading ...",
             format or "{symbol} {label}",
+            label or "Loading ...",
             symbols or r"\|/-",
         )
         self.running: bool
