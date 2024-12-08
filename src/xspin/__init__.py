@@ -1,10 +1,22 @@
 from math import ceil
 import sys
-from typing import Any, Iterable, Optional
+from typing import (
+    Any,
+    Callable,
+    Concatenate,
+    Coroutine,
+    Iterable,
+    Optional,
+    ParamSpec,
+    Self,
+    TypeVar,
+)
 from unicodedata import category, combining, east_asian_width
 from threading import Thread
 from time import sleep
 from asyncio import create_task, sleep as asleep, CancelledError, run as arun
+from functools import wraps
+from types import MethodType
 
 if sys.platform == "win32":
     from ctypes import byref, c_ulong, windll, Structure
@@ -178,6 +190,10 @@ def live_text(frames: Iterable[str]):
         yield get_lines(frame)
 
 
+PS = ParamSpec("PS")
+R = TypeVar("R")
+
+
 class SyncRuntime:
 
     def __init__(self, delay: int) -> None:
@@ -233,6 +249,14 @@ class SyncRuntime:
         schedule.after()
         state.handle = None
         state.instance = None
+
+    def bind(self, fn: Callable[Concatenate[Self, PS], R]) -> Callable[PS, R]:
+        @wraps(fn)
+        def wrapper(this: Self, *args: PS.args, **kwargs: PS.kwargs):
+            with this:
+                return fn(this, *args, **kwargs)
+
+        return MethodType(wrapper, self)
 
 
 class AsyncRuntime:
@@ -293,6 +317,16 @@ class AsyncRuntime:
         schedule.after()
         state.handle = None
         state.instance = None
+
+    def bind(
+        self, fn: Callable[Concatenate[Self, PS], Coroutine[Any, Any, R]]
+    ) -> Callable[PS, Coroutine[Any, Any, R]]:
+        @wraps(fn)
+        async def wrapper(this: Self, *args: PS.args, **kwargs: PS.kwargs):
+            async with this:
+                return await fn(this, *args, **kwargs)
+
+        return MethodType(wrapper, self)
 
 
 def stop():
