@@ -8,7 +8,7 @@ from asyncio import create_task, sleep as asleep, CancelledError, run as arun
 
 if sys.platform == "win32":
     from ctypes import byref, c_ulong, windll, Structure
-    from ctypes.wintypes import SHORT, _COORD, WORD  # type: ignore  "_COORD"
+    from ctypes.wintypes import SHORT, WORD
 
     KERNEL32 = windll.KERNEL32
     OUTHANDLE = KERNEL32.GetStdHandle(-12)  # Stderr handle
@@ -42,6 +42,9 @@ if sys.platform == "win32":
         def after():
             state.stream.write("\x1b]9;4;0;0\a")
             show_cursor()
+
+    class _COORD(Structure):
+        _fields_ = [("X", SHORT), ("Y", SHORT)]
 
     class _Rect(Structure):
         _fields_ = [
