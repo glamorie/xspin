@@ -4,6 +4,7 @@ from typing import Any, Iterable
 from unicodedata import category, combining, east_asian_width
 from threading import Thread
 from time import sleep
+from asyncio import create_task, sleep as asleep, CancelledError, run as arun
 
 if sys.platform == "win32":
     from ctypes import byref, c_ulong, windll, Structure
@@ -226,6 +227,66 @@ class SyncRuntime:
         state.instance = None
 
 
+class AsyncRuntime:
+    __slots__ = "running", "delay", "message"
+
+    def __init__(self, delay: int) -> None:
+        self.running = False
+        self.delay = delay / 1000
+        self.message = ""
+
+    async def __aenter__(self):
+        await self.start()
+        return self
+
+    async def __aexit__(self, *e: Any):
+        return await self.stop()
+
+    def render(self, message: str | None = None, end: bool = False) -> Iterable[int]:
+        raise NotImplementedError()
+
+    async def run(self):
+        clearable = None
+        delay = self.delay
+        try:
+            while self.running:
+                clearable = self.render(self.message or None)
+                self.message = ""
+                await asleep(delay)
+                clear_lines(sum(clearable))
+        except Exception:
+            if clearable:
+                clear_lines(sum(clearable))
+
+    async def start(self):
+        if self.running:
+            return
+        if state.instance:
+            stop()
+        state.instance = self
+        self.running = True
+        handle = create_task(self.run())
+        state.handle = handle
+
+    async def stop(self, epilogue: str | None = None):
+        if not self.running:
+            return
+        self.running = False
+        if state.handle:
+            try:
+                await state.handle
+            except CancelledError:
+                pass
+        message = self.message
+        if epilogue:
+            message = f"{message}{epilogue}\n"
+        self.render(message, True)
+        state.handle = None
+        state.instance = None
+
+
 def stop():
     if isinstance(state.handle, SyncRuntime):
         state.handle.stop()
+    elif isinstance(state.handle, AsyncRuntime):
+        arun(state.handle.stop())
