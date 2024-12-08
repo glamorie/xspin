@@ -264,6 +264,42 @@ class Axspin(Spinner, AsyncRuntime):
         * `delay`   Time interval between each spinner frame render.
         """
 
+class CustomSpinner(SyncRuntime):
+    """
+    Base class for syncronous spinners.
+    The `frames` method should be implemented.
+    """
+
+    def __init__(self, delay: Optional[int] = None) -> None:
+        """
+        # Params
+        * `delay` Time interval between each frame render.
+        """
+
+    def frames(self) -> Iterable[str]:
+        """
+        Should return an iterable of strings representing
+        how the spinner frame looks like.
+        """
+
+class CustomAspinner(AsyncRuntime):
+    """
+    Base class for asyncronous spinners.
+    The `frames` method should be implemented.
+    """
+
+    def __init__(self, delay: Optional[int] = None) -> None:
+        """
+        # Params
+        * `delay` Time interval between each frame render.
+        """
+
+    def frames(self) -> Iterable[str]:
+        """
+        Should return an iterable of strings representing
+        how the spinner frame looks like.
+        """
+
 def stop() -> None:
     """Stops the spinner running currently."""
 
