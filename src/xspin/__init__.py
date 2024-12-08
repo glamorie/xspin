@@ -1,28 +1,25 @@
 import sys
 
 if sys.platform == "win32":
+    from ctypes import byref, c_ulong, windll, Structure
+    from ctypes.wintypes import SHORT, _COORD, WORD  # type: ignore  "_COORD"
+
+    KERNEL32 = windll.KERNEL32
+    OUTHANDLE = KERNEL32.GetStdHandle(-12)  # Stderr handle
+    GetConsoleScreenBuffer = KERNEL32.GetConsoleScreenBuffer
 
     def _():
         """
         Enable virtual terminal processing for windows
         so ansi escape codes are parsed.
         """
-        try:
-            from ctypes import byref, c_ulong, windll
-        except ImportError:
-            return
         VT_PROCESSING_MODE = 0x0004
-        OUTPUT_HANDLE = sys.stdout.isatty() and -11 or -12
-        kernel32 = windll.kernel32
-        kernel32 = windll.kernel32
-        GetStdHandle = kernel32.GetStdHandle
-        GetConsoleMode = kernel32.GetConsoleMode
-        SetConsoleMode = kernel32.SetConsoleMode
-        handle = GetStdHandle(OUTPUT_HANDLE)
+        GetConsoleMode = KERNEL32.GetConsoleMode
+        SetConsoleMode = KERNEL32.SetConsoleMode
         mode = c_ulong()
-        GetConsoleMode(handle, byref(mode))
+        GetConsoleMode(OUTHANDLE, byref(mode))
         mode.value |= VT_PROCESSING_MODE
-        SetConsoleMode(handle, mode)
+        SetConsoleMode(OUTHANDLE, mode)
 
     class schedule:
         """
@@ -40,9 +37,37 @@ if sys.platform == "win32":
             state.stream.write("\x1b]9;4;0;0\a")
             show_cursor()
 
+    class _Rect(Structure):
+        _fields_ = [
+            ("left", SHORT),
+            ("top", SHORT),
+            ("right", SHORT),
+            ("bottom", SHORT),
+        ]
+
+    class _ConsoleScreenBuffer(Structure):
+        _fields_ = [
+            ("a", _COORD),  # dwSize
+            ("b", _COORD),  # dwCursorPosition
+            ("c", WORD),  # wAttributes
+            ("win", _Rect),  # srWindow
+            ("d", _COORD),  # dwMaximumWindowSize
+        ]
+
+    CSBI = _ConsoleScreenBuffer()
+
+    def get_console_width() -> int:
+        if not GetConsoleScreenBuffer(byref(CSBI)):
+            return 80
+        return CSBI.win.right - CSBI.win.left + 1
+
 else:
     import termios
     from sys import stdin
+    from fcntl import ioctl
+    from struct import unpack
+
+    FD = stdin.fileno()
 
     class schedule:
         """
@@ -50,20 +75,26 @@ else:
         while the spinner is running
         """
 
-        fd = stdin.fileno()
-        old_settings = termios.tcgetattr(fd)
+        old_settings = termios.tcgetattr(FD)
 
         @classmethod
         def before(cls):
-            new_settings = termios.tcgetattr(cls.fd)
+            new_settings = termios.tcgetattr(cls.FD)
             new_settings[3] = new_settings[3] & ~termios.ECHO
-            termios.tcsetattr(cls.fd, termios.TCSADRAIN, new_settings)
+            termios.tcsetattr(cls.FD, termios.TCSADRAIN, new_settings)
             hide_cursor()
 
         @classmethod
         def after(cls):
-            termios.tcsetattr(cls.fd, termios.TCSADRAIN, cls.old_settings)
+            termios.tcsetattr(cls.FD, termios.TCSADRAIN, cls.old_settings)
             show_cursor()
+
+    def get_console_width() -> int:
+        try:
+            rows, *_ = unpack("HHHH", ioctl(FD, termios.TIOCGWINSZ, "1234"))
+            return rows
+        except Exception:
+            return 80
 
 
 def hide_cursor():
