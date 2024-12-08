@@ -152,19 +152,15 @@ def get_lines(text: str) -> Iterable[int]:
 
 def clear_lines(lines: int):
     write = state.stream.write
-    if not lines:
-        lines = 1
-        write("\n")
-    for _ in range(lines):
-        write("\x1b[F\x1b[K")
+    write("\x1b[1G")
+    for i in range(lines):
+        if i > 0:
+            write("\x1b[1A")
+        write("\x1b[2K\x1b[1G")
 
 
 def live_text(frames: Iterable[str]):
     write = state.stream.write
-    flush = state.stream.flush
     for frame in frames:
         write(frame)
-        yield
-        clear_lines(sum(get_lines(frame)))
-        flush()
-        yield
+        yield get_lines(frame)
