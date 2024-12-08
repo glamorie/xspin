@@ -27,6 +27,8 @@ if sys.platform == "win32":
         mode.value |= VT_PROCESSING_MODE
         SetConsoleMode(OUTHANDLE, mode)
 
+    _()
+
     class schedule:
         """
         Adds progress indication in windows terminal
@@ -169,13 +171,14 @@ def clear_lines(lines: int):
 
 def live_text(frames: Iterable[str]):
     write = state.stream.write
+    flush = state.stream.flush
     for frame in frames:
         write(frame)
+        flush()
         yield get_lines(frame)
 
 
 class SyncRuntime:
-    __slots__ = "running", "delay", "message"
 
     def __init__(self, delay: int) -> None:
         self.running = False
@@ -210,6 +213,7 @@ class SyncRuntime:
             return
         if state.instance:
             stop()
+        schedule.before()
         state.instance = self
         self.running = True
         handle = Thread(target=self.run, daemon=True)
@@ -226,6 +230,7 @@ class SyncRuntime:
         if epilogue:
             message = f"{message}{epilogue}\n"
         state.stream.write(message)
+        schedule.after()
         state.handle = None
         state.instance = None
 
@@ -266,6 +271,7 @@ class AsyncRuntime:
             return
         if state.instance:
             stop()
+        schedule.before()
         state.instance = self
         self.running = True
         handle = create_task(self.run())
@@ -284,6 +290,7 @@ class AsyncRuntime:
         if epilogue:
             message = f"{message}{epilogue}\n"
         state.stream.write(message)
+        schedule.after()
         state.handle = None
         state.instance = None
 
@@ -322,7 +329,6 @@ class Frames:
 
 
 class Spinner:
-    __slots__ = "frames", "live"
 
     def __init__(
         self,
