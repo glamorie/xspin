@@ -90,14 +90,14 @@ else:
 
         @classmethod
         def before(cls):
-            new_settings = termios.tcgetattr(cls.FD)
+            new_settings = termios.tcgetattr(FD)
             new_settings[3] = new_settings[3] & ~termios.ECHO
-            termios.tcsetattr(cls.FD, termios.TCSADRAIN, new_settings)
+            termios.tcsetattr(FD, termios.TCSADRAIN, new_settings)
             hide_cursor()
 
         @classmethod
         def after(cls):
-            termios.tcsetattr(cls.FD, termios.TCSADRAIN, cls.old_settings)
+            termios.tcsetattr(FD, termios.TCSADRAIN, cls.old_settings)
             show_cursor()
 
     def get_console_width() -> int:
