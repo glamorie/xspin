@@ -1,6 +1,6 @@
 from math import ceil
 import sys
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
 from unicodedata import category, combining, east_asian_width
 from threading import Thread
 from time import sleep
@@ -189,7 +189,7 @@ class SyncRuntime:
     def __exit__(self, *e: Any):
         return self.stop()
 
-    def render(self, message: str | None = None, end: bool = False) -> Iterable[int]:
+    def render(self, message: str | None = None) -> Iterable[int]:
         raise NotImplementedError()
 
     def run(self):
@@ -225,7 +225,7 @@ class SyncRuntime:
         message = self.message
         if epilogue:
             message = f"{message}{epilogue}\n"
-        self.render(message, True)
+        state.stream.write(message)
         state.handle = None
         state.instance = None
 
@@ -245,7 +245,7 @@ class AsyncRuntime:
     async def __aexit__(self, *e: Any):
         return await self.stop()
 
-    def render(self, message: str | None = None, end: bool = False) -> Iterable[int]:
+    def render(self, message: str | None = None) -> Iterable[int]:
         raise NotImplementedError()
 
     async def run(self):
@@ -283,7 +283,7 @@ class AsyncRuntime:
         message = self.message
         if epilogue:
             message = f"{message}{epilogue}\n"
-        self.render(message, True)
+        state.stream.write(message)
         state.handle = None
         state.instance = None
 
@@ -293,3 +293,103 @@ def stop():
         state.handle.stop()
     elif isinstance(state.handle, AsyncRuntime):
         arun(state.handle.stop())
+
+
+class Frames:
+    def __init__(self, format: str, label: str, symbols: Iterable[str]) -> None:
+        if not isinstance(symbols, (str, set, tuple, list)):
+            symbols = list(symbols)
+        self.symbols = symbols
+        self.label = label
+        self.format = format
+        self.iterator = None
+
+    def __next__(self):
+        if self.iterator:
+            return next(self.iterator)
+        self.iterator = iter(self.iter())
+        return next(self.iterator)
+
+    def __iter__(self):
+        return self
+
+    def iter(self):
+        symbols = self.symbols
+        format = self.format
+        while True:
+            for symbol in symbols:
+                yield format.format(symbol=symbol, label=self.label)
+
+
+class Spinner:
+    __slots__ = "frames", "live"
+
+    def __init__(
+        self,
+        label: Optional[str] = None,
+        format: Optional[str] = None,
+        symbols: Optional[Iterable[str]] = None,
+    ) -> None:
+        self.frames = Frames(
+            format or "{symbol} {label}",
+            label or "Loading ...",
+            symbols or r"\|/-",
+        )
+        self.running: bool
+        self.message: str
+        self.live = iter(live_text(self.frames))
+
+    def render(self, message: str | None = None) -> Iterable[int]:
+        if message:
+            state.stream.write(message)
+        lines = next(self.live)
+        return lines
+
+    def echo(self, *values: Any, sep: str = ""):
+        message = sep.join(map(str, values)) + "\n"
+        if self.running:
+            setattr(self, "message", self.message + message)
+            return
+        state.stream.write(message)
+
+    @property
+    def label(self) -> str:
+        return self.frames.label
+
+    @label.setter
+    def label(self, label: str):
+        self.frames.label = label
+
+
+class Xspin(Spinner, SyncRuntime):
+    def __init__(
+        self,
+        label: str | None = None,
+        format: str | None = None,
+        symbols: Iterable[str] | None = None,
+        delay: Optional[int] = None,
+    ) -> None:
+        SyncRuntime.__init__(self, delay or 50)
+        Spinner.__init__(
+            self,
+            format,
+            label,
+            symbols,
+        )
+
+
+class Axspin(Spinner, AsyncRuntime):
+    def __init__(
+        self,
+        label: str | None = None,
+        format: str | None = None,
+        symbols: Iterable[str] | None = None,
+        delay: Optional[int] = None,
+    ) -> None:
+        AsyncRuntime.__init__(self, delay or 50)
+        Spinner.__init__(
+            self,
+            format,
+            label,
+            symbols,
+        )
