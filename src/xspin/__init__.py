@@ -337,8 +337,8 @@ class Spinner:
         symbols: Optional[Iterable[str]] = None,
     ) -> None:
         self.frames = Frames(
-            format or "{symbol} {label}",
             label or "Loading ...",
+            format or "{symbol} {label}",
             symbols or r"\|/-",
         )
         self.running: bool
@@ -378,8 +378,8 @@ class Xspin(Spinner, SyncRuntime):
         SyncRuntime.__init__(self, delay or 50)
         Spinner.__init__(
             self,
-            format,
             label,
+            format,
             symbols,
         )
 
