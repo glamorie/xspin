@@ -148,3 +148,23 @@ def get_lines(text: str) -> Iterable[int]:
 
     for line in text.splitlines():
         yield ceil(length(line) / console_width)
+
+
+def clear_lines(lines: int):
+    write = state.stream.write
+    if not lines:
+        lines = 1
+        write("\n")
+    for _ in range(lines):
+        write("\x1b[F\x1b[K")
+
+
+def live_text(frames: Iterable[str]):
+    write = state.stream.write
+    flush = state.stream.flush
+    for frame in frames:
+        write(frame)
+        yield
+        clear_lines(sum(get_lines(frame)))
+        flush()
+        yield
