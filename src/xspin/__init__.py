@@ -9,7 +9,7 @@ if sys.platform == "win32":
 
     KERNEL32 = windll.KERNEL32
     OUTHANDLE = KERNEL32.GetStdHandle(-12)  # Stderr handle
-    GetConsoleScreenBuffer = KERNEL32.GetConsoleScreenBuffer
+    GetConsoleScreenBuffer = KERNEL32.GetConsoleScreenBufferInfo
 
     def _():
         """
