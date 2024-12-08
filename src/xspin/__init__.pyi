@@ -266,3 +266,9 @@ class Axspin(Spinner, AsyncRuntime):
 
 def stop() -> None:
     """Stops the spinner running currently."""
+
+def force() -> None:
+    """
+    Force the render of the spinner even when the stream
+    is not tty.
+    """
