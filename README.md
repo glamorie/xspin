@@ -125,14 +125,25 @@ with MySpinner(30) as sp:
 ## Unix Tingz 
 When the spinner runs, it disables keystrokes from being echoed so they don't interfere with
 the spinner being rendered.
-![Demo](https://raw.githubusercontent.com/glamorie/xspin/main/media/ubuntu-demo.mp4)
+<video width = "600" autoplay loop>
+    <source src="https://raw.githubusercontent.com/glamorie/xspin/main/media/ubuntu-demo.mp4" type="video/mp4">
+    Ubuntu Preview
+</video>
+
 
 ## Windows Tingz
 On windows, virtual terminal mode is enabled in order for colors and ansi escape codes to work. This allows for the spinners to be rendered even on 
 the old `conhost.exe` emulator.
-![Demo](https://raw.githubusercontent.com/glamorie/xspin/main/media/conhost.mp4)
+<video width = "600" autoplay loop>
+    <source src="https://raw.githubusercontent.com/glamorie/xspin/main/media/conhost.mp4" type="video/mp4">
+    Windows Conhost Preview
+</video>
+
 The spinner also uses escape codes specified [here](https://learn.microsoft.com/en-us/windows/terminal/tutorials/progress-bar-sequences) to enable progress indication on windows terminal's titlebar and taskbar.
-![Demo](https://raw.githubusercontent.com/glamorie/xspin/main/media/wt.mp4)
+<video width = "600" autoplay loop>
+    <source src="https://raw.githubusercontent.com/glamorie/xspin/main/media/wt.mp4" type="video/mp4">
+    Windows Terminal preview.
+</video>
 
 ## License
 [MIT](LICENSE)
