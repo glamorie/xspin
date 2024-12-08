@@ -1,7 +1,9 @@
 from math import ceil
 import sys
-from typing import Iterable
+from typing import Any, Iterable
 from unicodedata import category, combining, east_asian_width
+from threading import Thread
+from time import sleep
 
 if sys.platform == "win32":
     from ctypes import byref, c_ulong, windll, Structure
@@ -115,6 +117,8 @@ def show_cursor():
 class state:
     stream = sys.stdout.isatty() and sys.stdout or sys.stderr
     enabled = stream.isatty()
+    handle: Any = None
+    instance: Any = None
 
 
 pattern = None
@@ -164,3 +168,64 @@ def live_text(frames: Iterable[str]):
     for frame in frames:
         write(frame)
         yield get_lines(frame)
+
+
+class SyncRuntime:
+    __slots__ = "running", "delay", "message"
+
+    def __init__(self, delay: int) -> None:
+        self.running = False
+        self.delay = delay / 1000
+        self.message = ""
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, *e: Any):
+        return self.stop()
+
+    def render(self, message: str | None = None, end: bool = False) -> Iterable[int]:
+        raise NotImplementedError()
+
+    def run(self):
+        clearable = None
+        delay = self.delay
+        try:
+            while self.running:
+                clearable = self.render(self.message or None)
+                self.message = ""
+                sleep(delay)
+                clear_lines(sum(clearable))
+        except Exception:
+            if clearable:
+                clear_lines(sum(clearable))
+
+    def start(self):
+        if self.running:
+            return
+        if state.instance:
+            stop()
+        state.instance = self
+        self.running = True
+        handle = Thread(target=self.run, daemon=True)
+        handle.start()
+        state.handle = handle
+
+    def stop(self, epilogue: str | None = None):
+        if not self.running:
+            return
+        self.running = False
+        if state.handle:
+            state.handle.join()
+        message = self.message
+        if epilogue:
+            message = f"{message}{epilogue}\n"
+        self.render(message, True)
+        state.handle = None
+        state.instance = None
+
+
+def stop():
+    if isinstance(state.handle, SyncRuntime):
+        state.handle.stop()
