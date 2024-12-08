@@ -438,3 +438,31 @@ class Axspin(Spinner, AsyncRuntime):
             label,
             symbols,
         )
+
+
+class CustomSpinner(SyncRuntime):
+    def __init__(self, delay: Optional[int] = None) -> None:
+        super().__init__(delay or 50)
+        self.live = live_text(self.frames())
+
+    def frames(self) -> Iterable[str]:
+        raise NotImplementedError()
+
+    def render(self, message: str | None = None) -> Iterable[int]:
+        if message:
+            state.stream.write(message)
+        return next(self.live)
+
+
+class CustomAspinner(AsyncRuntime):
+    def __init__(self, delay: Optional[int] = None) -> None:
+        super().__init__(delay or 50)
+        self.live = live_text(self.frames())
+
+    def frames(self) -> Iterable[str]:
+        raise NotImplementedError()
+
+    def render(self, message: str | None = None) -> Iterable[int]:
+        if message:
+            state.stream.write(message)
+        return next(self.live)
