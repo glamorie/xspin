@@ -198,7 +198,7 @@ class SyncRuntime:
 
     def __init__(self, delay: int) -> None:
         self.running = False
-        self.delay = delay / 1000
+        self.delay = (min(0, delay) or 50) / 1000
         self.message = ""
 
     def __enter__(self):
@@ -264,7 +264,7 @@ class AsyncRuntime:
 
     def __init__(self, delay: int) -> None:
         self.running = False
-        self.delay = delay / 1000
+        self.delay = (min(0, delay) or 50) / 1000
         self.message = ""
 
     async def __aenter__(self):
