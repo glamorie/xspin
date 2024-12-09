@@ -125,24 +125,16 @@ with MySpinner(30) as sp:
 ## Unix Tingz 
 When the spinner runs, it disables keystrokes from being echoed so they don't interfere with
 the spinner being rendered.
-<video width="600" autoplay loop>
-    <source src="https://raw.githubusercontent.com/glamorie/xspin/main/media/ubuntu-demo.mp4" type="video/mp4">
-    Ubuntu Terminal Demo: Shows the spinner running in a typical Ubuntu terminal environment with keystrokes disabled.
-</video>
+<img src="https://raw.githubusercontent.com/glamorie/xspin/main/media/ubuntu-demo.gif" alt="Ubuntu Demo: Spinner Running in ubuntu with keystrokes echoing disabled.">
+
 
 ## Windows Tingz
 On windows, virtual terminal mode is enabled in order for colors and ansi escape codes to work. This allows for the spinners to be rendered even on 
 the old `conhost.exe` emulator.
-<video width="600" autoplay loop>
-    <source src="https://raw.githubusercontent.com/glamorie/xspin/main/media/conhost.mp4" type="video/mp4">
-    Windows Conhost Demo: Demonstrates how the spinner runs with virtual terminal mode enabled on Windows' old `conhost.exe`.
-</video>
+<img src="https://raw.githubusercontent.com/glamorie/xspin/main/media/conhost.gif" alt="Windows Conhost Demo: Demonstrates how the spinner runs with virtual terminal mode enabled on Windows' old `conhost.exe`.">
 
 The spinner also uses escape codes specified [here](https://learn.microsoft.com/en-us/windows/terminal/tutorials/progress-bar-sequences) to enable progress indication on windows terminal's titlebar and taskbar.
-<video width = "600" autoplay loop>
-    <source src="https://raw.githubusercontent.com/glamorie/xspin/main/media/wt.mp4" type="video/mp4">
-    Windows Terminal Demo: Demonstrates the titlebar and taskbar progress inditcation when the spinner runs.
-</video>
+<img src="https://raw.githubusercontent.com/glamorie/xspin/main/media/wt.gif" alt="Windows Terminal Demo: Demonstrates titlebar progress indication when the spinner runs.">
 
 ## License
 [MIT](LICENSE)
