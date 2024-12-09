@@ -147,6 +147,9 @@ jobs:
   bump_version:
     needs: [details, github_release, pypi_publish]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
