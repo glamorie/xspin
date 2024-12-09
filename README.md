@@ -1,5 +1,8 @@
 # xspin
 Python module for creating console spinners.
+![PyPI version](https://badge.fury.io/py/xspin.svg)
+![Build Status](https://github.com/glamorie/xspin/workflows/release/badge.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
 ## Spinner runtimes
 There are two types of spinner's based on the kind of program being 
