@@ -20,7 +20,7 @@ from types import MethodType
 
 if sys.platform == "win32":
     from ctypes import byref, c_ulong, windll, Structure
-    from ctypes.wintypes import SHORT, WORD
+    from ctypes.wintypes import SHORT, USHORT
 
     KERNEL32 = windll.KERNEL32
     OUTHANDLE = KERNEL32.GetStdHandle(-12)  # Stderr handle
@@ -72,7 +72,7 @@ if sys.platform == "win32":
         _fields_ = [
             ("a", _COORD),  # dwSize
             ("b", _COORD),  # dwCursorPosition
-            ("c", WORD),  # wAttributes
+            ("c", USHORT),  # wAttributes
             ("win", _Rect),  # srWindow
             ("d", _COORD),  # dwMaximumWindowSize
         ]
