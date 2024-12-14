@@ -163,10 +163,14 @@ def chwidth(char: str) -> int:
     return 1
 
 
+def mchwidth(text: str):
+    return sum(map(chwidth, text))
+
+
 def get_lines(text: str) -> Iterable[int]:
     console_width = get_console_width()
     text = get_pattern().sub("", text)
-    length = text.isascii() and len or chwidth
+    length = text.isascii() and len or mchwidth
 
     for line in text.splitlines():
         yield ceil(length(line) / console_width)
