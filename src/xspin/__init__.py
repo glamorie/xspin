@@ -173,7 +173,7 @@ def get_lines(text: str) -> Iterable[int]:
     length = text.isascii() and len or mchwidth
 
     for line in text.splitlines():
-        yield ceil(length(line) / console_width)
+        yield ceil(length(line) / console_width) or 1
 
 
 def clear_lines(lines: int):
