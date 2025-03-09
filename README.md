@@ -125,13 +125,13 @@ with MySpinner(30) as sp:
     sp.echo("Done!")     
 ```
 
-## Unix Tingz 
+## Unix 
 When the spinner runs, it disables keystrokes from being echoed so they don't interfere with
 the spinner being rendered.
 <img src="https://raw.githubusercontent.com/glamorie/xspin/main/media/ubuntu-demo.gif" alt="Ubuntu Demo: Spinner Running in ubuntu with keystrokes echoing disabled.">
 
 
-## Windows Tingz
+## Windows
 On windows, virtual terminal mode is enabled in order for colors and ansi escape codes to work. This allows for the spinners to be rendered even on 
 the old `conhost.exe` emulator.
 <img src="https://raw.githubusercontent.com/glamorie/xspin/main/media/conhost.gif" alt="Windows Conhost Demo: Demonstrates how the spinner runs with virtual terminal mode enabled on Windows' old `conhost.exe`.">
